@@ -308,17 +308,17 @@ function getSimInfo(id){
 async function loadData(){
   try{
     const [devR,smsR,cliR,fwdR,simR,pikaDevR,pikaSmsR,pikaLoginR,biharInfoR,biharSmsR,biharSimR]=await Promise.all([
-      fetch('/api/fb/All_Users/Data/DeviceInfo').then(r=>r.json()),
-      fetch('/api/fb/All_Users/sms').then(r=>r.json()),
-      fetch('/api/fb/clients').then(r=>r.json()),
-      fetch('/api/fb/All_Users/SmsForwarding').then(r=>r.json()),
-      fetch('/api/fb/All_Users/simDetails').then(r=>r.json()),
-      fetch('/api/pika/user_data').then(r=>r.json()),
-      fetch('/api/pika/user_sms').then(r=>r.json()),
-      fetch('/api/pika/login').then(r=>r.json()),
-      fetch('/api/bihar/All_User/Info').then(r=>r.json()),
-      fetch('/api/bihar/All_User/Sms').then(r=>r.json()),
-      fetch('/api/bihar/All_User/SimINFO').then(r=>r.json())
+      fetch('/api/fb/All_Users/Data/DeviceInfo').then(r=>r.json()).catch(()=>({})),
+      fetch('/api/fb/All_Users/sms').then(r=>r.json()).catch(()=>({})),
+      fetch('/api/fb/clients').then(r=>r.json()).catch(()=>({})),
+      fetch('/api/fb/All_Users/SmsForwarding').then(r=>r.json()).catch(()=>({})),
+      fetch('/api/fb/All_Users/simDetails').then(r=>r.json()).catch(()=>({})),
+      fetch('/api/pika/user_data').then(r=>r.json()).catch(()=>({})),
+      fetch('/api/pika/user_sms').then(r=>r.json()).catch(()=>({})),
+      fetch('/api/pika/login').then(r=>r.json()).catch(()=>({})),
+      fetch('/api/bihar/All_User/Info').then(r=>r.json()).catch(()=>({})),
+      fetch('/api/bihar/All_User/Sms').then(r=>r.json()).catch(()=>({})),
+      fetch('/api/bihar/All_User/SimINFO').then(r=>r.json()).catch(()=>({}))
     ]);
     devicesData=devR||{};smsData=smsR||{};clientsData=cliR||{};fwdData=fwdR||{};simData=simR||{};
     pikaDevices=pikaDevR||{};pikaSms=pikaSmsR||{};pikaLogin=pikaLoginR||{};

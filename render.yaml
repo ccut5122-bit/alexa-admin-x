@@ -3,7 +3,7 @@ services:
     name: alexa-admin-x
     runtime: python
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --workers 4 --timeout 60
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --workers 4 --timeout 90 --limit-request-line 8190 --limit-request-field_size 0
     envVars:
       - key: RENDER_EXTERNAL_URL
         value: https://alexa-admin-x.onrender.com
