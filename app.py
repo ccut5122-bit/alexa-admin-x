@@ -336,6 +336,10 @@ def bot_polling():
             log.error(f'Polling error: {e}')
             time.sleep(5)
 
+# Webhook setup for gunicorn (import time)
+if os.environ.get('RENDER_EXTERNAL_URL', ''):
+    set_webhook()
+
 if __name__=='__main__':
     base_url = os.environ.get('RENDER_EXTERNAL_URL', '')
     if base_url:
@@ -346,4 +350,4 @@ if __name__=='__main__':
         t.start()
         log.info('Bot polling thread started')
     port=int(os.environ.get('PORT',8080))
-    app.run(host='0.0.0.0',port=port)
+    app.run(host='0.0.0.0',port=port, threaded=True)
