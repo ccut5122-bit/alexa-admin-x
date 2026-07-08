@@ -352,6 +352,10 @@ async function loadData(){
 
 checkSession();
 
+// Data load + polling - starts immediately
+setTimeout(loadData,500);
+setInterval(loadData,30000);
+
 // Fast SMS-key poll
 async function pollSmsKeys(){
   if(!dataLoaded)return;
@@ -370,6 +374,7 @@ async function pollSmsKeys(){
     if(changed)updateUI();
   }catch(e){}
 }
+setInterval(pollSmsKeys,2000);
 
 function updateUI(){
   const scr=document.querySelector('.scr.act');
@@ -408,10 +413,6 @@ function loginSuccess(){
   document.getElementById('logScr').classList.remove('act');
   document.getElementById('mainScr').classList.add('act');
   renderDashboard();startMedia();showToast('█ ACCESS GRANTED');
-  // Start data loading + polling after login
-  setTimeout(loadData,300);
-  setInterval(loadData,30000);
-  setInterval(pollSmsKeys,2000);
 }
 function checkSession(){
   const saved=localStorage.getItem('ax_sess');
