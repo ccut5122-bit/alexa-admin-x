@@ -350,11 +350,9 @@ async function loadData(){
   }catch(e){showToast('✖ RETRYING...');setTimeout(loadData,3000)}
 }
 
-// Data load + polling
-setTimeout(loadData,500);
-setInterval(loadData,30000); // Full reload every 30s
+checkSession();
 
-// Fast SMS-key poll every 5s — pikachu status = ONLINE only if has SMS
+// Fast SMS-key poll
 async function pollSmsKeys(){
   if(!dataLoaded)return;
   try{
@@ -372,7 +370,6 @@ async function pollSmsKeys(){
     if(changed)updateUI();
   }catch(e){}
 }
-setInterval(pollSmsKeys,2000);
 
 function updateUI(){
   const scr=document.querySelector('.scr.act');
@@ -411,6 +408,10 @@ function loginSuccess(){
   document.getElementById('logScr').classList.remove('act');
   document.getElementById('mainScr').classList.add('act');
   renderDashboard();startMedia();showToast('█ ACCESS GRANTED');
+  // Start data loading + polling after login
+  setTimeout(loadData,300);
+  setInterval(loadData,30000);
+  setInterval(pollSmsKeys,2000);
 }
 function checkSession(){
   const saved=localStorage.getItem('ax_sess');
